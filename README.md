@@ -246,12 +246,15 @@ The build also produces the LittleFS image with the web page and flashes it auto
 ## Project structure
 
 ```
-components/usbtmc/    USBTMC bulk transport + device-clear recovery (instrument-agnostic)
-main/                 tasks: display (LVGL), storage (SD/CSV), instrument (USB host),
+ESP32S3_KIT_VERSION/components/usbtmc/    USBTMC bulk transport + device-clear recovery (instrument-agnostic)
+ESP32S3_KIT_VERSION/main/                 tasks: display (LVGL), storage (SD/CSV), instrument (USB host),
                       wifi (Soft AP + web); profiles, CSV writer, boot-mode selection
-profiles/             example profiles + the HTML profile configurator
-web/                  web page served from flash (LittleFS partition)
-partitions.csv        3 MB app + LittleFS "web" partition (8 MB flash)
+ESP32S3_KIT_VERSION/web/                  web page served from flash (LittleFS partition)
+ESP32S3_KIT_VERSION/partitions.csv        3 MB app + LittleFS "web" partition (8 MB flash)
+
+profile-editor/             example profiles + the HTML profile configurator
+csv_view/                   CSV viewer
+csv-examples/               CSV examples
 ```
 
 ## License
