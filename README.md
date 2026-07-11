@@ -2,8 +2,7 @@
 
 A standalone data logger for SCPI measurement instruments (USBTMC over USB), built on the
 **Espressif ESP32-S3-USB-OTG** dev kit. This repository is the **proof-of-concept /
-verification series** of the project — the firmware architecture is written so that a future
-custom board only needs a different board support package, not a rewrite.
+verification series** of the project.
 
 Plug an instrument into the USB host port, and the kit identifies it (`*IDN?`), picks a
 matching **profile**, and starts logging readings to CSV files on the SD card. No PC needed —
