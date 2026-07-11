@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCPI Profile Editor - ESP32-OTG Logger</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary: #bb86fc;
+            --primary-hover: #9b6bc9;
+            --success: #03dac6;
+            --success-hover: #01bca7;
+            --danger: #cf6679;
+            --danger-hover: #b54d5f;
+            --warning: #ffb300;
+            --border-color: #333;
+            --input-bg: #2d2d2d;
+            --input-focus: #444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .container {
+            background-color: var(--panel-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 1100px;
+            box-sizing: border-box;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            background: #252525;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section h2 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--input-focus);
+        }
+
+        /* Checkbox style */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            margin-top: 5px;
+        }
+
+        .checkbox-container input {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        /* Buttons styling */
+        .btn {
+            background-color: var(--primary);
+            color: #121212;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Lists design */
+        .dynamic-list-item {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .measurement-card {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .measurement-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .measurement-card-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            border-top: 1px solid #2d2d2d;
+            padding-top: 8px;
+        }
+
+        /* Result code / Preview box */
+        .preview-box {
+            background: #121212;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .preview-box textarea {
+            width: 100%;
+            height: 480px;
+            background: transparent;
+            border: none;
+            color: var(--success);
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #444;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            background: #1c1c1c;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+        }
+
+        /* Recommendations Table */
+        .rec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .rec-table th,
+        .rec-table td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .rec-table th {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .rec-table tr:hover {
+            background: #252525;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-dmm { background-color: #8f3bbf; color: #fff; }
+        .badge-psu { background-color: #007acc; color: #fff; }
+        .badge-load { background-color: #d9534f; color: #fff; }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .alert-box {
+            background-color: rgba(3, 218, 198, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 12px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>SCPI Profile Editor</h1>
+    <div class="subtitle">Configuration tool for USB SCPI Logger (ESP32-OTG)</div>
+
+    <div class="container">
+        <!-- Preset Selection Row -->
+        <div class="section">
+            <h2>Select Preset</h2>
+            <div style="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px;">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="preset-select">Load Predefined Rigol Instrument</label>
+                    <select id="preset-select" onchange="loadPreset()">
+                        <option value="">-- Choose an Instrument --</option>
+                        <!-- Dynamic options loaded via javascript -->
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-sm" onclick="document.getElementById('presets-file-input').click()" style="background-color: #333; color: #ccc; border: 1px solid #555; width: 100%;">
+                        Import presets.json
+                    </button>
+                    <input type="file" id="presets-file-input" accept=".json" style="display: none;" onchange="handlePresetsUpload(event)">
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-box">
+            <strong>How it works:</strong> Upon connecting the instrument via USB, the logger firmware reads profile files from the SD card folder <code>/sdcard/profiles/</code>. It matches the <code>*IDN?</code> response substring with <code>match.idn_contains</code> and checks if the USB Vendor ID matches <code>match.vid</code>. If they match, the logging configuration is applied.
+        </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid-2">
+            <!-- Left Side: Profile Fields Editor -->
+            <div>
+                <!-- General Section -->
+                <div class="section">
+                    <h2>Basic Parameters</h2>
+                    
+                    <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="input-group">
+                            <label for="field-id">Profile ID (filename)</label>
+                            <input type="text" id="field-id" placeholder="e.g. rigol_dl3021" oninput="updateProfile()">
+                            <div class="hint">Identifier without spaces, lowercase only.</div>
+                        </div>
+                        <div class="input-group">
+                            <label for="field-name">Instrument Name in Menu</label>
+                            <input type="text" id="field-name" placeholder="e.g. Rigol DL3021 Load" oninput="updateProfile()">
+                            <div class="hint">Human-readable name displayed on the logger screen.</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="input-group">
+                            <label for="match-idn">Match in *IDN? (idn_contains)</label>
+                            <input type="text" id="match-idn" placeholder="e.g. DL3021" oninput="updateProfile()">
+                            <div class="hint">Substring that must appear in the IDN string.</div>
+                        </div>
+                        <div class="input-group">
+                            <label for="match-vid">USB Vendor ID (vid)</label>
+                            <input type="text" id="match-vid" placeholder="e.g. 0x1AB1 or 6833" oninput="updateProfile()">
+                            <div class="hint">Rigol's default USB VID is <code>0x1AB1</code> (or 0 for any).</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="input-group">
+                            <label for="field-interval">Default Interval (ms)</label>
+                            <input type="number" id="field-interval" value="1000" min="500" step="50" oninput="updateProfile()" onblur="clampInterval()">
+                            <div class="hint">Minimum interval allowed is 500 ms.</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Logging Mode (select_single)</label>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="field-select-single" onchange="updateProfile()">
+                                <label for="field-select-single" style="font-weight: normal; color:#fff; display:inline;">DMM style (one value active)</label>
+                            </div>
+                            <div class="hint"><strong>Checked:</strong> logger cycles through menu items. <strong>Unchecked:</strong> logs all parameters as columns simultaneously.</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Start on Connect (autostart)</label>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="field-autostart" checked onchange="updateProfile()">
+                                <label for="field-autostart" style="font-weight: normal; color:#fff; display:inline;">start logging when plugged in</label>
+                            </div>
+                            <div class="hint"><strong>Checked:</strong> headless campaigns, auto-resume after a power loss. <strong>Unchecked:</strong> logging waits for the OK button / web Start.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Init Commands Section -->
+                <div class="section">
+                    <h2>Initialization Commands (init)</h2>
+                    <p class="hint" style="margin-bottom: 10px;">SCPI commands sent once upon connecting the instrument (e.g. to set remote mode, clear registers, etc.)</p>
+                    <div id="init-commands-list">
+                        <!-- Dynamic commands list -->
+                    </div>
+                    <button class="btn btn-sm" onclick="addInitCommand()">+ Add Command</button>
+                </div>
+
+                <!-- Measurements Section -->
+                <div class="section">
+                    <h2>Measurement Definitions (measurements)</h2>
+                    <p class="hint" style="margin-bottom: 15px;">Individual parameters queried cyclically and recorded to the CSV file.</p>
+                    <div id="measurements-list">
+                        <!-- Dynamic measurements card list -->
+                    </div>
+                    <button class="btn btn-success" onclick="addMeasurement()">+ Add Measurement</button>
+                </div>
+            </div>
+
+            <!-- Right Side: JSON Output Preview -->
+            <div>
+                <div class="section" style="position: sticky; top: 20px;">
+                    <h2>Output JSON Profile</h2>
+                    <div class="preview-box">
+                        <textarea id="json-preview" readonly spellcheck="false"></textarea>
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn" id="btn-download" onclick="downloadJSON()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width:2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download Profile (.json)
+                        </button>
+                        <button class="btn btn-success" onclick="copyToClipboard()">
+                            Copy JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Info Section -->
+        <div class="section">
+            <h2>Recommended Rigol Instruments for the Logger</h2>
+            <p style="font-size:0.95rem; line-height: 1.5; color: #ccc; margin-bottom: 15px;">
+                The USB SCPI Logger running on ESP32-OTG with USB Host support can read data from most standard bench instruments. Below is a list of recommended Rigol models grouped by purpose:
+            </p>
+            <table class="rec-table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Category</th>
+                        <th style="width: 20%;">Model Series</th>
+                        <th style="width: 25%;">Key Features</th>
+                        <th style="width: 35%;">Example SCPI Queries for the Logger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-load">DC Electronic Load</span></td>
+                        <td><strong>Rigol DL3000 series</strong><br>(DL3021, DL3021A, DL3031)</td>
+                        <td>Battery discharge logging, power supply testing. 150V, 40A/60A, up to 350W.</td>
+                        <td><code>:MEASure:VOLTage:DC?</code> (voltage)<br><code>:MEASure:CURRent:DC?</code> (current)<br><code>:MEASure:POWer:DC?</code> (load power)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-psu">Bench Power Supply</span></td>
+                        <td><strong>Rigol DP800 series</strong><br>(DP832, DP831, DP811)</td>
+                        <td>Up to 3 isolated outputs. Industry standard for device power rails and current logging.</td>
+                        <td><code>:MEASure:VOLTage? CH1</code> (voltage CH1)<br><code>:MEASure:CURRent? CH1</code> (current CH1)<br><code>:MEASure:POWer? CH1</code> (power CH1)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-psu">Bench Power Supply</span></td>
+                        <td><strong>Rigol DP900 series</strong><br>(DP932A, DP932U, DP932E)</td>
+                        <td>Modern replacement for DP800 with color touchscreen and compact footprint.</td>
+                        <td>Same SCPI as DP800 (e.g. <code>:MEASure:VOLTage? CH1</code> etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-dmm">Digital Multimeter</span></td>
+                        <td><strong>Rigol DM3058 / E</strong><br>(5.5 digit)</td>
+                        <td>Economic and highly stable bench DMM. Fast reading speed.</td>
+                        <td><code>:MEASure:VOLTage:DC?</code> (DC voltage)<br><code>:MEASure:CURRent:DC?</code> (DC current)<br><code>:MEASure:RESistance?</code> (resistance)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-dmm">Digital Multimeter</span></td>
+                        <td><strong>Rigol DM3068</strong><br>(6.5 digit)</td>
+                        <td>Higher accuracy, reading speed, and advanced configuration options.</td>
+                        <td>Same SCPI commands as DM3058.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="hint" style="margin-top: 15px;">
+                * <strong>Tip:</strong> For programmable loads and PSUs, it is recommended to set <code>select_single: false</code>, which records all configured channels/measurements as columns in each line. For multimeters, select <code>select_single: true</code>.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Preset configurations dictionary (Built-in Fallbacks)
+        const presets = {
+            rigol_dm3058e: {
+                id: "rigol_dm3058e",
+                name: "Rigol DM3058E DMM",
+                match: { idn_contains: "DM3058", vid: "0x1AB1" },
+                select_single: true,
+                default_interval_ms: 1000,
+                init: [],
+                measurements: [
+                    { scpi: ":MEASure:VOLTage:DC?", label: "DC Voltage", unit: "V", column: "voltage_dc" },
+                    { scpi: ":MEASure:CURRent:DC?", label: "DC Current", unit: "A", column: "current_dc" },
+                    { scpi: ":MEASure:RESistance?", label: "Resistance", unit: "Ohm", column: "resistance" }
+                ]
+            },
+            rigol_dm3068: {
+                id: "rigol_dm3068",
+                name: "Rigol DM3068 DMM",
+                match: { idn_contains: "DM3068", vid: "0x1AB1" },
+                select_single: true,
+                default_interval_ms: 1000,
+                init: [
+                    ":CMDSET RIGOL",
+                    "*CLS"
+                ],
+                measurements: [
+                    { scpi: ":MEASure:VOLTage:DC?", label: "DC Voltage", unit: "V", column: "voltage_dc" },
+                    { scpi: ":MEASure:CURRent:DC?", label: "DC Current", unit: "A", column: "current_dc" },
+                    { scpi: ":MEASure:RESistance?", label: "Resistance", unit: "Ohm", column: "resistance" },
+                    { scpi: ":MEASure:TEMPerature?", label: "Temperature", unit: "C", column: "temperature" }
+                ]
+            },
+            rigol_dp832a: {
+                id: "rigol_dp832a",
+                name: "Rigol DP832A PSU",
+                match: { idn_contains: "DP832", vid: "0x1AB1" },
+                select_single: false,
+                default_interval_ms: 1000,
+                init: [],
+                measurements: [
+                    { scpi: ":MEASure:VOLTage? CH1", label: "CH1 U", unit: "V", column: "ch1_v" },
+                    { scpi: ":MEASure:CURRent? CH1", label: "CH1 I", unit: "A", column: "ch1_i" },
+                    { scpi: ":MEASure:VOLTage? CH2", label: "CH2 U", unit: "V", column: "ch2_v" },
+                    { scpi: ":MEASure:CURRent? CH2", label: "CH2 I", unit: "A", column: "ch2_i" },
+                    { scpi: ":MEASure:VOLTage? CH3", label: "CH3 U", unit: "V", column: "ch3_v" },
+                    { scpi: ":MEASure:CURRent? CH3", label: "CH3 I", unit: "A", column: "ch3_i" }
+                ]
+            },
+            rigol_dp932a: {
+                id: "rigol_dp932a",
+                name: "Rigol DP932A PSU",
+                match: { idn_contains: "DP932", vid: "0x1AB1" },
+                select_single: false,
+                default_interval_ms: 1000,
+                init: [
+                    "*CLS"
+                ],
+                measurements: [
+                    { scpi: ":MEASure:VOLTage? CH1", label: "CH1 U", unit: "V", column: "ch1_v" },
+                    { scpi: ":MEASure:CURRent? CH1", label: "CH1 I", unit: "A", column: "ch1_i" },
+                    { scpi: ":MEASure:POWer? CH1", label: "CH1 P", unit: "W", column: "ch1_p" },
+                    { scpi: ":MEASure:VOLTage? CH2", label: "CH2 U", unit: "V", column: "ch2_v" },
+                    { scpi: ":MEASure:CURRent? CH2", label: "CH2 I", unit: "A", column: "ch2_i" },
+                    { scpi: ":MEASure:POWer? CH2", label: "CH2 P", unit: "W", column: "ch2_p" },
+                    { scpi: ":MEASure:VOLTage? CH3", label: "CH3 U", unit: "V", column: "ch3_v" },
+                    { scpi: ":MEASure:CURRent? CH3", label: "CH3 I", unit: "A", column: "ch3_i" },
+                    { scpi: ":MEASure:POWer? CH3", label: "CH3 P", unit: "W", column: "ch3_p" }
+                ]
+            },
+            rigol_dl3021: {
+                id: "rigol_dl3021",
+                name: "Rigol DL3021 Load",
+                match: { idn_contains: "DL30", vid: "0x1AB1" },
+                select_single: false,
+                default_interval_ms: 1000,
+                init: [
+                    ":SOURce:INPut:STATe ON"
+                ],
+                measurements: [
+                    { scpi: ":MEASure:VOLTage:DC?", label: "Load U", unit: "V", column: "load_voltage" },
+                    { scpi: ":MEASure:CURRent:DC?", label: "Load I", unit: "A", column: "load_current" },
+                    { scpi: ":MEASure:POWer:DC?", label: "Load P", unit: "W", column: "load_power" }
+                ]
+            }
+        };
+
+        // Active workspace state
+        let profileState = {
+            id: "my_device",
+            name: "My Custom Device",
+            match: { idn_contains: "CUSTOM", vid: "0x1AB1" },
+            select_single: false,
+            default_interval_ms: 1000,
+            init: [],
+            measurements: [
+                { scpi: ":MEASure?", label: "Measurement 1", unit: "V", column: "value1" }
+            ]
+        };
+
+        // Rebuild preset dropdown items dynamically
+        function rebuildPresetDropdown() {
+            const select = document.getElementById("preset-select");
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">-- Choose an Instrument --</option>';
+            
+            for (const key in presets) {
+                if (presets.hasOwnProperty(key)) {
+                    const opt = document.createElement("option");
+                    opt.value = key;
+                    opt.textContent = presets[key].name || key;
+                    select.appendChild(opt);
+                }
+            }
+            
+            if (presets[currentValue]) {
+                select.value = currentValue;
+            }
+        }
+
+        // Fetch presets.json dynamically (CORS limitations apply on direct file:// protocol)
+        async function loadPresetsJson() {
+            try {
+                const res = await fetch("presets.json");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && typeof data === 'object') {
+                        Object.assign(presets, data);
+                        rebuildPresetDropdown();
+                        console.log("Presets dynamically loaded from presets.json");
+                    }
+                }
+            } catch (err) {
+                console.warn("Dynamic fetch of 'presets.json' blocked by CORS or file is missing. Using built-in presets.", err);
+            }
+        }
+
+        // Import local presets JSON manually
+        function handlePresetsUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && typeof parsed === 'object') {
+                        Object.assign(presets, parsed);
+                        rebuildPresetDropdown();
+                        alert("Successfully imported custom presets!");
+                    } else {
+                        alert("Error: File does not contain a valid presets JSON object.");
+                    }
+                } catch (err) {
+                    alert("Error reading presets JSON: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        // Populate fields from the active state
+        function renderProfileFields() {
+            document.getElementById("field-id").value = profileState.id || "";
+            document.getElementById("field-name").value = profileState.name || "";
+            document.getElementById("match-idn").value = (profileState.match && profileState.match.idn_contains) || "";
+            document.getElementById("match-vid").value = (profileState.match && profileState.match.vid) || "";
+            document.getElementById("field-interval").value = profileState.default_interval_ms || 1000;
+            document.getElementById("field-select-single").checked = !!profileState.select_single;
+            // Missing in older profiles = true (firmware default).
+            document.getElementById("field-autostart").checked = profileState.autostart !== false;
+
+            // Render Init Commands
+            const initContainer = document.getElementById("init-commands-list");
+            initContainer.innerHTML = "";
+            (profileState.init || []).forEach((cmd, index) => {
+                const row = document.createElement("div");
+                row.className = "dynamic-list-item";
+                row.innerHTML = `
+                    <input type="text" value="${escapeHtml(cmd)}" placeholder="SCPI Command" oninput="updateInitCommand(${index}, this.value)" style="flex:1;">
+                    <button class="btn btn-danger btn-sm" onclick="removeInitCommand(${index})">Delete</button>
+                `;
+                initContainer.appendChild(row);
+            });
+
+            // Render Measurements
+            const measContainer = document.getElementById("measurements-list");
+            measContainer.innerHTML = "";
+            (profileState.measurements || []).forEach((meas, index) => {
+                const card = document.createElement("div");
+                card.className = "measurement-card";
+                card.innerHTML = `
+                    <div class="measurement-card-grid">
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>SCPI Command</label>
+                            <input type="text" value="${escapeHtml(meas.scpi || "")}" placeholder="e.g. :MEASure:VOLTage:DC?" oninput="updateMeasurement(${index}, 'scpi', this.value)">
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label>Menu / CSV Label (label)</label>
+                            <input type="text" value="${escapeHtml(meas.label || "")}" placeholder="e.g. DC Voltage" oninput="updateMeasurement(${index}, 'label', this.value)">
+                        </div>
+                        <div class="input-group" style="margin-bottom:0; margin-top: 10px;">
+                            <label>Physical Unit (unit)</label>
+                            <input type="text" value="${escapeHtml(meas.unit || "")}" placeholder="e.g. V, A, Ohm" oninput="updateMeasurement(${index}, 'unit', this.value)">
+                        </div>
+                        <div class="input-group" style="margin-bottom:0; margin-top: 10px;">
+                            <label>CSV Column Name (column)</label>
+                            <input type="text" value="${escapeHtml(meas.column || "")}" placeholder="e.g. voltage_dc" oninput="updateMeasurement(${index}, 'column', this.value)">
+                        </div>
+                    </div>
+                    <div class="measurement-card-actions">
+                        <button class="btn btn-danger btn-sm" onclick="removeMeasurement(${index})">Remove Measurement</button>
+                    </div>
+                `;
+                measContainer.appendChild(card);
+            });
+
+            updateJsonPreview();
+        }
+
+        // Serialize state to preview text area
+        function updateJsonPreview() {
+            const preview = document.getElementById("json-preview");
+            preview.value = JSON.stringify(profileState, null, 2);
+        }
+
+        // Collect changes from simple text inputs
+        function updateProfile() {
+            profileState.id = document.getElementById("field-id").value;
+            profileState.name = document.getElementById("field-name").value;
+            
+            if (!profileState.match) profileState.match = {};
+            profileState.match.idn_contains = document.getElementById("match-idn").value;
+            
+            let vidVal = document.getElementById("match-vid").value.trim();
+            if (vidVal === "" || vidVal === "0") {
+                profileState.match.vid = 0;
+            } else {
+                profileState.match.vid = vidVal;
+            }
+
+            let rawInterval = parseInt(document.getElementById("field-interval").value);
+            let intervalVal = isNaN(rawInterval) ? 1000 : rawInterval;
+            
+            // Enforce minimum 500ms constraint
+            profileState.default_interval_ms = Math.max(500, intervalVal);
+            profileState.select_single = document.getElementById("field-select-single").checked;
+            profileState.autostart = document.getElementById("field-autostart").checked;
+
+            updateJsonPreview();
+        }
+
+        // Clamp field values to minimum 500ms on blur
+        function clampInterval() {
+            const input = document.getElementById("field-interval");
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 500) {
+                input.value = 500;
+            }
+            updateProfile();
+        }
+
+        // Load predefined device configuration
+        function loadPreset() {
+            const selected = document.getElementById("preset-select").value;
+            if (selected && presets[selected]) {
+                profileState = JSON.parse(JSON.stringify(presets[selected]));
+                profileState.default_interval_ms = Math.max(500, profileState.default_interval_ms || 1000);
+                renderProfileFields();
+            }
+        }
+
+
+        // Manage Init Commands
+        function addInitCommand() {
+            if (!profileState.init) profileState.init = [];
+            profileState.init.push("");
+            renderProfileFields();
+        }
+
+        function updateInitCommand(index, value) {
+            profileState.init[index] = value;
+            updateJsonPreview();
+        }
+
+        function removeInitCommand(index) {
+            profileState.init.splice(index, 1);
+            renderProfileFields();
+        }
+
+        // Manage Measurements
+        function addMeasurement() {
+            if (!profileState.measurements) profileState.measurements = [];
+            profileState.measurements.push({
+                scpi: "",
+                label: "",
+                unit: "",
+                column: ""
+            });
+            renderProfileFields();
+        }
+
+        function updateMeasurement(index, key, value) {
+            if (profileState.measurements[index]) {
+                profileState.measurements[index][key] = value;
+                updateJsonPreview();
+            }
+        }
+
+        function removeMeasurement(index) {
+            profileState.measurements.splice(index, 1);
+            renderProfileFields();
+        }
+
+        // Download generated JSON file
+        function downloadJSON() {
+            const filename = (profileState.id || "profile") + ".json";
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profileState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", filename);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Copy JSON preview to clipboard
+        function copyToClipboard() {
+            const preview = document.getElementById("json-preview");
+            preview.select();
+            preview.setSelectionRange(0, 99999);
+            
+            try {
+                navigator.clipboard.writeText(preview.value);
+                alert("JSON copied to clipboard.");
+            } catch (err) {
+                document.execCommand("copy");
+                alert("JSON copied to clipboard (fallback).");
+            }
+        }
+
+        // Helper to escape HTML characters
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', async () => {
+            rebuildPresetDropdown();
+            // Default select
+            profileState = JSON.parse(JSON.stringify(presets.rigol_dm3058e));
+            renderProfileFields();
+            // Load from external presets.json if available
+            await loadPresetsJson();
+        });
+    </script>
+    <footer style="text-align: center; color: #777; font-size: 12px; padding: 14px 0;">
+        &copy;2026 fotoventus.cz
+    </footer>
+</body>
+
+</html>

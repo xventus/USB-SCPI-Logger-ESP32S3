@@ -1,0 +1,19 @@
+# ESP-IDF build output
+build/
+
+# Component manager cache - restored from dependencies.lock + idf_component.yml
+managed_components/
+
+# Generated/machine-specific config (canonical config lives in sdkconfig.defaults)
+sdkconfig
+sdkconfig.old
+
+# CSV logs pulled off the SD card during testing
+csv/
+
+# Editor
+.vscode/
+
+# OS cruft
+.DS_Store
+Thumbs.db

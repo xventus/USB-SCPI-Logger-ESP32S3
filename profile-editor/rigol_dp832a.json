@@ -1,0 +1,16 @@
+{
+  "id": "rigol_dp832a",
+  "name": "Rigol DP832A PSU",
+  "match": { "idn_contains": "DP832", "vid": "0x1AB1" },
+  "select_single": false,
+  "default_interval_ms": 1000,
+  "init": [],
+  "measurements": [
+    { "scpi": ":MEASure:VOLTage? CH1", "label": "CH1 U", "unit": "V", "column": "ch1_v" },
+    { "scpi": ":MEASure:CURRent? CH1", "label": "CH1 I", "unit": "A", "column": "ch1_i" },
+    { "scpi": ":MEASure:VOLTage? CH2", "label": "CH2 U", "unit": "V", "column": "ch2_v" },
+    { "scpi": ":MEASure:CURRent? CH2", "label": "CH2 I", "unit": "A", "column": "ch2_i" },
+    { "scpi": ":MEASure:VOLTage? CH3", "label": "CH3 U", "unit": "V", "column": "ch3_v" },
+    { "scpi": ":MEASure:CURRent? CH3", "label": "CH3 I", "unit": "A", "column": "ch3_i" }
+  ]
+}

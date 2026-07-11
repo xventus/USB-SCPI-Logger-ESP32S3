@@ -1,0 +1,13 @@
+{
+  "id": "rigol_dm3058e",
+  "name": "Rigol DM3058E DMM",
+  "match": { "idn_contains": "DM3058", "vid": "0x1AB1" },
+  "select_single": true,
+  "default_interval_ms": 1000,
+  "init": [],
+  "measurements": [
+    { "scpi": ":MEASure:VOLTage:DC?", "label": "DC Voltage", "unit": "V",   "column": "voltage_dc" },
+    { "scpi": ":MEASure:CURRent:DC?", "label": "DC Current", "unit": "A",   "column": "current_dc" },
+    { "scpi": ":MEASure:RESistance?", "label": "Resistance", "unit": "Ohm", "column": "resistance" }
+  ]
+}

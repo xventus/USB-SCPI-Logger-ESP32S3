@@ -1,0 +1,55 @@
+# This file can be edited manually or regenerated using idf.py save-defconfig.
+# Espressif IoT Development Framework (ESP-IDF) Project Minimal Configuration
+#
+# Target board: Espressif ESP32-S3-USB-OTG (module ESP32-S3-MINI-1-N8)
+#
+
+CONFIG_IDF_TARGET="esp32s3"
+
+# ESP32-S3-MINI-1-N8: 8 MB flash, no PSRAM.
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_SPI_FLASH_SIZE_OVERRIDE=y
+
+# Custom partition table: 3 MB app + LittleFS "web" partition with the
+# Soft AP page. Changing the table needs a one-time full erase + flash.
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# C++ exceptions are not used, keep the binary small.
+CONFIG_COMPILER_CXX_EXCEPTIONS=n
+
+# A bit more verbose logging during development.
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# --- USB host (the instrument is plugged into the Type-A host port) ---
+# The USBTMC transport is a hand-written client on top of the generic
+# usb_host library. No class driver is used.
+CONFIG_USB_HOST_CONTROL_TRANSFER_MAX_SIZE=1024
+
+# Larger main-task stack: app_main brings up the BSP display (LVGL) before
+# the worker tasks take over.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# Brownout: correctly finish an in-flight SD write on a supply dip (kap. 10).
+CONFIG_ESP_BROWNOUT_DET=y
+
+# --- SD card FAT filesystem ---
+# Long filenames so descriptive log names work (e.g. rigol_dm3058e_0001.csv);
+# without this FATFS only allows 8.3 names and fopen() returns EINVAL.
+# UTF-8 API encoding to match the UTF-8 CSV requirement (kap. 8).
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_MAX_LFN=255
+CONFIG_FATFS_API_ENCODING_UTF_8=y
+
+# --- LVGL GUI ---
+# 24 pt for the big live reading, 16 pt for the menu and status icons
+# (LVGL symbols/FontAwesome glyphs are embedded in the Montserrat fonts).
+CONFIG_LV_FONT_MONTSERRAT_16=y
+CONFIG_LV_FONT_MONTSERRAT_24=y
+
+# --- PC mode (USB MSC disk) ---
+# In the PC boot mode the OTG port switches to device role and TinyUSB
+# exposes the SD card to the PC as a Mass Storage disk. Bigger MSC buffer =
+# noticeably faster transfers (RAM is only used in this boot mode).
+CONFIG_TINYUSB_MSC_ENABLED=y
+CONFIG_TINYUSB_MSC_BUFSIZE=8192

@@ -1,0 +1,84 @@
+{
+  "rigol_dm3058e": {
+    "id": "rigol_dm3058e",
+    "name": "Rigol DM3058E DMM",
+    "match": { "idn_contains": "DM3058", "vid": "0x1AB1" },
+    "select_single": true,
+    "default_interval_ms": 1000,
+    "init": [],
+    "measurements": [
+      { "scpi": ":MEASure:VOLTage:DC?", "label": "DC Voltage", "unit": "V", "column": "voltage_dc" },
+      { "scpi": ":MEASure:CURRent:DC?", "label": "DC Current", "unit": "A", "column": "current_dc" },
+      { "scpi": ":MEASure:RESistance?", "label": "Resistance", "unit": "Ohm", "column": "resistance" }
+    ]
+  },
+  "rigol_dm3068": {
+    "id": "rigol_dm3068",
+    "name": "Rigol DM3068 DMM",
+    "match": { "idn_contains": "DM3068", "vid": "0x1AB1" },
+    "select_single": true,
+    "default_interval_ms": 1000,
+    "init": [
+      ":CMDSET RIGOL",
+      "*CLS"
+    ],
+    "measurements": [
+      { "scpi": ":MEASure:VOLTage:DC?", "label": "DC Voltage", "unit": "V", "column": "voltage_dc" },
+      { "scpi": ":MEASure:CURRent:DC?", "label": "DC Current", "unit": "A", "column": "current_dc" },
+      { "scpi": ":MEASure:RESistance?", "label": "Resistance", "unit": "Ohm", "column": "resistance" },
+      { "scpi": ":MEASure:TEMPerature?", "label": "Temperature", "unit": "C", "column": "temperature" }
+    ]
+  },
+  "rigol_dp832a": {
+    "id": "rigol_dp832a",
+    "name": "Rigol DP832A PSU",
+    "match": { "idn_contains": "DP832", "vid": "0x1AB1" },
+    "select_single": false,
+    "default_interval_ms": 1000,
+    "init": [],
+    "measurements": [
+      { "scpi": ":MEASure:VOLTage? CH1", "label": "CH1 U", "unit": "V", "column": "ch1_v" },
+      { "scpi": ":MEASure:CURRent? CH1", "label": "CH1 I", "unit": "A", "column": "ch1_i" },
+      { "scpi": ":MEASure:VOLTage? CH2", "label": "CH2 U", "unit": "V", "column": "ch2_v" },
+      { "scpi": ":MEASure:CURRent? CH2", "label": "CH2 I", "unit": "A", "column": "ch2_i" },
+      { "scpi": ":MEASure:VOLTage? CH3", "label": "CH3 U", "unit": "V", "column": "ch3_v" },
+      { "scpi": ":MEASure:CURRent? CH3", "label": "CH3 I", "unit": "A", "column": "ch3_i" }
+    ]
+  },
+  "rigol_dp932a": {
+    "id": "rigol_dp932a",
+    "name": "Rigol DP932A PSU",
+    "match": { "idn_contains": "DP932", "vid": "0x1AB1" },
+    "select_single": false,
+    "default_interval_ms": 1000,
+    "init": [
+      "*CLS"
+    ],
+    "measurements": [
+      { "scpi": ":MEASure:VOLTage? CH1", "label": "CH1 U", "unit": "V", "column": "ch1_v" },
+      { "scpi": ":MEASure:CURRent? CH1", "label": "CH1 I", "unit": "A", "column": "ch1_i" },
+      { "scpi": ":MEASure:POWer? CH1", "label": "CH1 P", "unit": "W", "column": "ch1_p" },
+      { "scpi": ":MEASure:VOLTage? CH2", "label": "CH2 U", "unit": "V", "column": "ch2_v" },
+      { "scpi": ":MEASure:CURRent? CH2", "label": "CH2 I", "unit": "A", "column": "ch2_i" },
+      { "scpi": ":MEASure:POWer? CH2", "label": "CH2 P", "unit": "W", "column": "ch2_p" },
+      { "scpi": ":MEASure:VOLTage? CH3", "label": "CH3 U", "unit": "V", "column": "ch3_v" },
+      { "scpi": ":MEASure:CURRent? CH3", "label": "CH3 I", "unit": "A", "column": "ch3_i" },
+      { "scpi": ":MEASure:POWer? CH3", "label": "CH3 P", "unit": "W", "column": "ch3_p" }
+    ]
+  },
+  "rigol_dl3021": {
+    "id": "rigol_dl3021",
+    "name": "Rigol DL3021 Load",
+    "match": { "idn_contains": "DL30", "vid": "0x1AB1" },
+    "select_single": false,
+    "default_interval_ms": 1000,
+    "init": [
+      ":SOURce:INPut:STATe ON"
+    ],
+    "measurements": [
+      { "scpi": ":MEASure:VOLTage:DC?", "label": "Load U", "unit": "V", "column": "load_voltage" },
+      { "scpi": ":MEASure:CURRent:DC?", "label": "Load I", "unit": "A", "column": "load_current" },
+      { "scpi": ":MEASure:POWer:DC?", "label": "Load P", "unit": "W", "column": "load_power" }
+    ]
+  }
+}
