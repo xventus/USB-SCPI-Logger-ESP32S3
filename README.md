@@ -126,7 +126,7 @@ the kit supports a new instrument without touching the firmware.
 Profiles are created with the **configurator**: pick a preset or fill in the form, add
 measurements, and download the JSON. Use it online at
 **[fotoventus.cz/tools/logger/profile.html](https://fotoventus.cz/tools/logger/profile.html)**,
-or offline from the repo — `profiles/scpi_profile_editor.html`, a single-file HTML editor
+or offline from the repo — `profile-editor/scpi_profile_editor.html`, a single-file HTML editor
 that needs no server.
 
 > The list of built-in presets grows over time as more instruments get added — check the
