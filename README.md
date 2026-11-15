@@ -4,6 +4,8 @@ A standalone data logger for SCPI measurement instruments (USBTMC over USB), bui
 **Espressif ESP32-S3-USB-OTG** dev kit. This repository is the **proof-of-concept /
 verification series** of the project.
 
+This project gave rise to the **[BenchLogger application](https://fotoventus.cz/benchlogger/)**.
+
 Plug an instrument into the USB host port, and the kit identifies it (`*IDN?`), picks a
 matching **profile**, and starts logging readings to CSV files on the SD card. No PC needed —
 but when you want one, the kit can turn into a USB card reader or bring up its own WiFi
