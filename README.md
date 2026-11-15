@@ -1,7 +1,7 @@
 # SCPI Logger
 
 A standalone data logger for SCPI measurement instruments (USBTMC over USB), built on the
-**Espressif ESP32-S3-USB-OTG** dev kit. This repository is the **proof-of-concept /
+**[Espressif ESP32-S3-USB-OTG](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-usb-otg/user_guide.html)** dev kit. This repository is the **proof-of-concept /
 verification series** of the project.
 
 This project gave rise to the **[BenchLogger application](https://fotoventus.cz/benchlogger/)**.
